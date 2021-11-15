@@ -55,8 +55,6 @@ namespace Innovix.Controllers
                     return View(model);
                 }
                 ViewBag.Success = "The Total Rate Is " + total.ToString();
-                model = new ReservationViewModel();
-                model.CheckIn = model.CheckOut = DateTime.Now;
                 FillDropDownList(model);
                 return View(model);
             }
