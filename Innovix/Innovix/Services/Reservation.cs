@@ -16,6 +16,9 @@ namespace Innovix.Services
         public decimal GetReservationTotal
             (DateTime ChckIn_Date, DateTime ChckOut_Date, int AdultsNo, int ChildrenNo, int RoomTypeId, int MealPlanId)
         {
+            var Orig_CheckIn = ChckIn_Date;
+            var Orig_CheckOut = ChckOut_Date;
+
             decimal TotalRatePerRoom = 0;
             int RoomsNo = 0;
 
@@ -50,38 +53,38 @@ namespace Innovix.Services
             decimal MealsRate = 0;
             MealPlan MealPlan = _db.MealPlans.FirstOrDefault(a => a.Id == MealPlanId);
 
-            if (ChckIn_Date.Month>=1&&ChckIn_Date.Month<=5) // check-in date is in low Season
+            if (Orig_CheckIn.Month>=1&&Orig_CheckIn.Month<=5) // check-in date is in low Season
             {
-                if (ChckOut_Date.Month >= 1 && ChckIn_Date.Month <= 5) //check-out also is in low season
+                if (Orig_CheckOut.Month >= 1 && Orig_CheckIn.Month <= 5) //check-out also is in low season
                 {
-                    days = (int)(ChckOut_Date - ChckIn_Date).TotalDays+1;
+                    days = (int)(Orig_CheckOut - Orig_CheckIn).TotalDays+1;
                     MealsRate = MealPlan.LowSeasonRate * days;
                 }
                 else //check-out is in high Season
                 {
-                    days = (int)(new DateTime(ChckIn_Date.Year, 5, 30) - ChckIn_Date).TotalDays+1; //count days in low season
+                    days = (int)(new DateTime(Orig_CheckIn.Year, 5, 30) - Orig_CheckIn).TotalDays+1; //count days in low season
                     MealsRate = MealPlan.LowSeasonRate * days;
-                    days = (int)(ChckOut_Date- new DateTime(ChckOut_Date.Year, 6, 1)).TotalDays+1; //count days in high season
+                    days = (int)(Orig_CheckOut- new DateTime(Orig_CheckOut.Year, 6, 1)).TotalDays+1; //count days in high season
                     MealsRate += MealPlan.HighSeasonRate * days;
                 }
             }
             else // check-in date is in high Season
             {
-                if (ChckOut_Date.Month >= 1 && ChckIn_Date.Month <= 5) //check-out is in low season
+                if (Orig_CheckOut.Month >= 1 && Orig_CheckIn.Month <= 5) //check-out is in low season
                 {
-                    days = (int)(new DateTime(ChckIn_Date.Year, 12, DateTime.DaysInMonth(ChckIn_Date.Year, 12))-ChckIn_Date).TotalDays+1; //count days in high season
+                    days = (int)(new DateTime(Orig_CheckIn.Year, 12, DateTime.DaysInMonth(Orig_CheckIn.Year, 12))-Orig_CheckIn).TotalDays+1; //count days in high season
                     MealsRate = MealPlan.HighSeasonRate * days;
-                    days = (int)(ChckOut_Date - new DateTime(ChckOut_Date.Year, 1, 1)).TotalDays + 1; //count days in low season
+                    days = (int)(Orig_CheckOut - new DateTime(Orig_CheckOut.Year, 1, 1)).TotalDays + 1; //count days in low season
                     MealsRate += MealPlan.LowSeasonRate * days;
                 }
                 else //check-out also is in high Season
                 {
-                    days = (int)((ChckOut_Date - ChckIn_Date).TotalDays + 1);
+                    days = (int)((Orig_CheckOut - Orig_CheckIn).TotalDays + 1);
                     MealsRate = MealPlan.HighSeasonRate * days;
                 }
             }
 
-            return (TotalRatePerRoom*RoomsNo)+MealsRate;
+            return (TotalRatePerRoom * RoomsNo) + (MealsRate * (AdultsNo + ChildrenNo)) ;
         }
     }
 }
